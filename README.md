@@ -22,6 +22,9 @@ pip install -r requirements.txt
 
 Fiecare pas al unui episod are o etichetă git, ca să puteți urmări codul pas cu pas: `git checkout ep001/step-2`.
 
+- Episodul 1 (`ep001/step-1` ... `ep001/end`): clasa `Value` și metoda `backward()`, derivatele locale, verificarea
+  cu diferențe finite, grafurile desenate cu Graphviz și aceeași expresie în PyTorch.
+
 Sistemul de diferențiere automată urmează ideea și structura din [micrograd](https://github.com/karpathy/micrograd),
 scris de Andrej Karpathy (licență MIT).
 
