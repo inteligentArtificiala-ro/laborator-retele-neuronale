@@ -1,5 +1,7 @@
 """Un sistem minimal de diferențiere automată pentru numere, după micrograd (Andrej Karpathy, licență MIT)."""
 
+import math
+
 
 class Value:
     def __init__(self, data, _children=(), _op="", label=""):
@@ -35,6 +37,67 @@ class Value:
 
         out._backward = _backward
         return out
+
+    def __pow__(self, exponent):
+        assert isinstance(exponent, (int, float)), "exponentul trebuie să fie un număr obișnuit"
+        out = Value(self.data**exponent, (self,), f"**{exponent}")
+
+        def _backward():
+            self.grad += exponent * self.data ** (exponent - 1) * out.grad
+
+        out._backward = _backward
+        return out
+
+    def exp(self):
+        out = Value(math.exp(self.data), (self,), "exp")
+
+        def _backward():
+            self.grad += out.data * out.grad
+
+        out._backward = _backward
+        return out
+
+    def tanh(self):
+        t = math.tanh(self.data)
+        out = Value(t, (self,), "tanh")
+
+        def _backward():
+            self.grad += (1 - t**2) * out.grad
+
+        out._backward = _backward
+        return out
+
+    def relu(self):
+        out = Value(max(0.0, self.data), (self,), "relu")
+
+        def _backward():
+            self.grad += (out.data > 0) * out.grad
+
+        out._backward = _backward
+        return out
+
+
+    def __neg__(self):
+        return self * -1
+
+    def __sub__(self, other):
+        return self + (-other)
+
+    def __truediv__(self, other):
+        return self * other**-1
+
+
+    def __radd__(self, other):
+        return self + other
+
+    def __rmul__(self, other):
+        return self * other
+
+    def __rsub__(self, other):
+        return other + (-self)
+
+    def __rtruediv__(self, other):
+        return other * self**-1
 
     def backward(self):
         topo = []
