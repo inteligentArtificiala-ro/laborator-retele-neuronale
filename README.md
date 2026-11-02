@@ -24,6 +24,15 @@ Fiecare pas al unui episod are o etichetă git, ca să puteți urmări codul pas
 
 - Episodul 1 (`ep001/step-1` ... `ep001/end`): clasa `Value` și metoda `backward()`, derivatele locale, verificarea
   cu diferențe finite, grafurile desenate cu Graphviz și aceeași expresie în PyTorch.
+- Episodul 2 (`ep002/step-1` ... `ep002/end`): neuroni, straturi și o rețea cu mai multe straturi, antrenarea pe două
+  semilune, apoi rețeaua pentru MNIST cu NumPy și cu PyTorch.
+
+```bash
+python diagrams.py      # diagramele grafurilor computaționale, în directorul imagini/
+python moons.py         # rețeaua mică, antrenată pe două semilune de puncte
+python mnist_numpy.py   # rețeaua pentru MNIST, scrisă cu NumPy
+python mnist_torch.py   # aceeași rețea în PyTorch (după pip install torch)
+```
 
 Sistemul de diferențiere automată urmează ideea și structura din [micrograd](https://github.com/karpathy/micrograd),
 scris de Andrej Karpathy (licență MIT).
