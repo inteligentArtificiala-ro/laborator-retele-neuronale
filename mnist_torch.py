@@ -2,14 +2,42 @@
 
 import time
 
+import numpy as np
 import torch
 import torch.nn as nn
 
 from mnist_data import load_mnist
+from mnist_numpy import backward, forward, init_params, softmax
 
 
 def make_model():
     return nn.Sequential(nn.Linear(784, 128), nn.ReLU(), nn.Linear(128, 10))
+
+
+def compare_gradients(x, y):
+    params = init_params()
+    logits, cache = forward(params, x)
+    ours = backward(params, cache, softmax(logits), y)
+
+    model = make_model()
+    with torch.no_grad():
+        # nn.Linear ține ponderile transpuse: (ieșiri, intrări).
+        model[0].weight.copy_(torch.from_numpy(params["W1"].T))
+        model[0].bias.copy_(torch.from_numpy(params["b1"]))
+        model[2].weight.copy_(torch.from_numpy(params["W2"].T))
+        model[2].bias.copy_(torch.from_numpy(params["b2"]))
+    loss = nn.functional.cross_entropy(model(torch.from_numpy(x)), torch.from_numpy(y))
+    loss.backward()
+
+    theirs = {
+        "W1": model[0].weight.grad.T,
+        "b1": model[0].bias.grad,
+        "W2": model[2].weight.grad.T,
+        "b2": model[2].bias.grad,
+    }
+    for name in ours:
+        diff = np.abs(ours[name] - theirs[name].numpy()).max()
+        print(f"  {name}: diferența maximă {diff:.1e}")
 
 
 def train(x_train, y_train, x_test, y_test, epochs=10, batch_size=64, lr=0.1, seed=0):
@@ -39,6 +67,9 @@ def train(x_train, y_train, x_test, y_test, epochs=10, batch_size=64, lr=0.1, se
 
 if __name__ == "__main__":
     data = load_mnist()
+    print("Gradienții NumPy față de autograd, pe un lot de 64 de imagini:")
+    compare_gradients(data[0][:64], data[1][:64])
+    print()
     start = time.time()
     train(*(torch.from_numpy(a) for a in data))
     print(f"Durata antrenării: {time.time() - start:.1f} s")
