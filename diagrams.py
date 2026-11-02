@@ -4,6 +4,7 @@ import os
 
 from engine import Value
 from graph import draw_graph
+from nn import MLP
 
 OUT = "imagini"
 
@@ -41,6 +42,26 @@ def neuron():
     return o
 
 
+def tiny_mlp():
+    model = MLP(2, [2, 1], activation="relu")
+    hidden, output = model.layers[0].neurons, model.layers[1].neurons[0]
+    values = {"w11": 0.5, "w12": -0.25, "b1": 0.1, "w21": -0.4, "w22": 0.3, "b2": 0.2}
+    for j, n in enumerate(hidden, start=1):
+        for i, w in enumerate(n.w, start=1):
+            w.label, w.data = f"w{j}{i}", values[f"w{j}{i}"]
+        n.b.label, n.b.data = f"b{j}", values[f"b{j}"]
+    for j, (w, value) in enumerate(zip(output.w, [1.2, 0.6]), start=1):
+        w.label, w.data = f"v{j}", value
+    output.b.label, output.b.data = "c", 0.3
+
+    x = [Value(1.0, label="x1"), Value(-1.0, label="x2")]
+    y = model(x)
+    y.label = "y"
+    loss = (y - 1.0) ** 2
+    loss.label = "pierdere"
+    return loss
+
+
 def draw_before_and_after():
     L = expression()
     draw_graph(L, f"{OUT}/expresie-inainte.svg")
@@ -60,5 +81,10 @@ if __name__ == "__main__":
     o.backward()
     draw_graph(o, f"{OUT}/neuron.svg")
     print(f"Neuronul: o = {o.data:.4f}")
+
+    loss = tiny_mlp()
+    loss.backward()
+    draw_graph(loss, f"{OUT}/retea-mica.svg")
+    print(f"Rețeaua mică: pierderea = {loss.data:.4f}")
 
     print("Diagramele au fost salvate în", OUT)
