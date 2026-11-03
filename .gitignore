@@ -1,0 +1,5 @@
+__pycache__/
+.venv/
+# Setul de date MNIST și imaginile desenate de scripturi
+data/
+imagini/
